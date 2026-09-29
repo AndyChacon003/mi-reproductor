@@ -56,26 +56,41 @@ export default function Reproductor() {
 
         setCargando(true);
         try {
-            const urlSimulada = URL.createObjectURL(archivoFisico);
+            // 1. Subir el archivo de audio a Vercel Blob
+            const responseBlob = await fetch(`/api/upload?filename=${archivoFisico.name}`, {
+                method: 'POST',
+                body: archivoFisico,
+            });
 
-            const response = await fetch('/api/canciones', {
+            const blobData = await responseBlob.json();
+            if (!responseBlob.ok) throw new Error(blobData.error || "Error subiendo el audio");
+
+            // Obtenemos la URL permanente de Vercel
+            const urlDefinitiva = blobData.url;
+
+            // 2. Guardar los datos en Neon con la URL real
+            const responseNeon = await fetch('/api/canciones', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     titulo,
                     artista: artista || 'Desconocido',
-                    url_archivo: urlSimulada,
+                    url_archivo: urlDefinitiva,
                 }),
             });
 
-            const nuevaCancion = await response.json();
+            const nuevaCancion = await responseNeon.json();
+
+            // Actualizamos la lista
             setCanciones([nuevaCancion, ...canciones]);
             setTitulo('');
             setArtista('');
             setArchivoFisico(null);
             e.target.reset();
+
         } catch (error) {
-            console.error("Error al subir:", error);
+            console.error("Error:", error);
+            alert("Hubo un error al subir la canción.");
         } finally {
             setCargando(false);
         }
@@ -86,6 +101,7 @@ export default function Reproductor() {
     return (
         <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-neutral-950 to-black text-white p-4 md:p-8 font-sans selection:bg-purple-500/30">
 
+            {/* Cabecera Glassmorphism */}
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 md:mb-12 bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-lg transition-all hover:bg-white/10">
                 <p className="text-neutral-300 text-center sm:text-left text-lg">
                     Hola, <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">{usuario?.nombre}</span> ✨
@@ -100,6 +116,7 @@ export default function Reproductor() {
 
             <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
 
+                {/* Lado Izquierdo: Reproductor */}
                 <div className="lg:col-span-5 space-y-6 md:space-y-8">
                     <div className="bg-white/5 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-white/10 shadow-2xl shadow-purple-900/20 relative overflow-hidden group">
                         <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-purple-500/30 transition-all duration-500"></div>
@@ -164,6 +181,7 @@ export default function Reproductor() {
                     </div>
                 </div>
 
+                {/* Lado Derecho: Lista de reproducción */}
                 <div className="lg:col-span-7 bg-white/5 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-white/10 shadow-2xl flex flex-col h-[600px] md:h-auto md:min-h-[700px]">
                     <div className="flex justify-between items-end mb-6 border-b border-white/10 pb-4">
                         <h2 className="text-2xl md:text-3xl font-bold">Tu Biblioteca</h2>
@@ -182,8 +200,8 @@ export default function Reproductor() {
                                     key={cancion.id}
                                     onClick={() => reproducir(cancion)}
                                     className={`p-4 md:p-5 rounded-2xl cursor-pointer transition-all duration-300 flex justify-between items-center group border ${cancionActual?.id === cancion.id
-                                        ? 'bg-purple-600/20 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.15)]'
-                                        : 'bg-black/20 border-transparent hover:bg-white/10 hover:border-white/10'
+                                            ? 'bg-purple-600/20 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.15)]'
+                                            : 'bg-black/20 border-transparent hover:bg-white/10 hover:border-white/10'
                                         }`}
                                 >
                                     <div className="flex items-center gap-4 truncate">
