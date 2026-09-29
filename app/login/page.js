@@ -32,7 +32,6 @@ export default function LoginRegistro() {
             }
 
             localStorage.setItem('usuario', JSON.stringify(data));
-
             router.push('/');
 
         } catch (err) {
@@ -42,8 +41,8 @@ export default function LoginRegistro() {
 
     return (
         <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 font-sans text-white">
-            <div className="bg-neutral-900 p-8 rounded-2xl border border-neutral-800 shadow-xl w-full max-w-md">
-                <h2 className="text-3xl font-bold mb-6 text-center text-green-400">
+            <div className="bg-neutral-900 p-6 sm:p-8 rounded-2xl border border-neutral-800 shadow-xl w-full max-w-md">
+                <h2 className="text-3xl font-bold mb-6 text-center text-purple-400">
                     {esRegistro ? 'Crear Cuenta' : 'Iniciar Sesión'}
                 </h2>
 
@@ -60,7 +59,7 @@ export default function LoginRegistro() {
                             placeholder="Tu Nombre"
                             value={nombre}
                             onChange={(e) => setNombre(e.target.value)}
-                            className="w-full bg-neutral-800 p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-400"
+                            className="w-full bg-neutral-800 p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 transition"
                             required
                         />
                     )}
@@ -69,7 +68,7 @@ export default function LoginRegistro() {
                         placeholder="Correo Electrónico"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-neutral-800 p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-400"
+                        className="w-full bg-neutral-800 p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 transition"
                         required
                     />
                     <input
@@ -77,12 +76,12 @@ export default function LoginRegistro() {
                         placeholder="Contraseña"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-neutral-800 p-3 rounded-lg outline-none focus:ring-2 focus:ring-green-400"
+                        className="w-full bg-neutral-800 p-3 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 transition"
                         required
                     />
                     <button
                         type="submit"
-                        className="w-full bg-green-500 text-neutral-950 font-bold py-3 rounded-lg hover:bg-green-400 transition"
+                        className="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-500 transition shadow-lg shadow-purple-500/20"
                     >
                         {esRegistro ? 'Registrarme' : 'Entrar'}
                     </button>
@@ -95,7 +94,7 @@ export default function LoginRegistro() {
                             setEsRegistro(!esRegistro);
                             setError('');
                         }}
-                        className="text-green-400 font-semibold ml-2 hover:underline"
+                        className="text-purple-400 font-semibold ml-2 hover:text-purple-300 transition hover:underline"
                     >
                         {esRegistro ? 'Inicia Sesión' : 'Regístrate'}
                     </button>

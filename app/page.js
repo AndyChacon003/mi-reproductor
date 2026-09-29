@@ -18,14 +18,11 @@ export default function Reproductor() {
     const [cargando, setCargando] = useState(false);
 
     useEffect(() => {
-        // 1. Verificamos si existe la sesión en el navegador
         const usuarioGuardado = localStorage.getItem('usuario');
 
         if (!usuarioGuardado) {
-            // Si no hay sesión, lo regresamos al login de inmediato
             router.push('/login');
         } else {
-            // Si hay sesión, guardamos sus datos, damos permiso y cargamos las canciones
             setUsuario(JSON.parse(usuarioGuardado));
             setAutorizado(true);
 
@@ -41,7 +38,6 @@ export default function Reproductor() {
         }
     }, [router]);
 
-    // Función para salir
     const cerrarSesion = () => {
         localStorage.removeItem('usuario');
         router.push('/login');
@@ -85,42 +81,39 @@ export default function Reproductor() {
         }
     };
 
-    // Evita que la pantalla del reproductor parpadee antes de redirigir al login
     if (!autorizado) return null;
 
     return (
-        <div className="min-h-screen bg-neutral-950 text-white p-8 font-sans">
+        <div className="min-h-screen bg-neutral-950 text-white p-4 md:p-8 font-sans">
 
-            {/* Cabecera con saludo y botón de salir */}
-            <div className="max-w-4xl mx-auto flex justify-between items-center mb-8 bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow-lg">
-                <p className="text-neutral-300">
-                    Hola, <span className="font-bold text-green-400">{usuario?.nombre}</span> 👋
+            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 md:mb-8 bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow-lg">
+                <p className="text-neutral-300 text-center sm:text-left">
+                    Hola, <span className="font-bold text-purple-400">{usuario?.nombre}</span> 👋
                 </p>
                 <button
                     onClick={cerrarSesion}
-                    className="bg-red-500/10 text-red-500 hover:bg-red-500/20 px-4 py-2 rounded-lg text-sm font-semibold transition"
+                    className="w-full sm:w-auto bg-red-500/10 text-red-500 hover:bg-red-500/20 px-4 py-2 rounded-lg text-sm font-semibold transition"
                 >
                     Cerrar Sesión
                 </button>
             </div>
 
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">
 
-                {/* Panel del Reproductor y Formulario */}
-                <div className="space-y-8">
-                    <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl">
-                        <h1 className="text-3xl font-bold mb-6 text-green-400">🎵 Mi Reproductor</h1>
+                <div className="space-y-6 md:space-y-8">
+                    <div className="bg-neutral-900 p-5 md:p-6 rounded-2xl border border-neutral-800 shadow-xl">
+                        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-purple-400">🎵 Mi Reproductor</h1>
 
                         <div className="bg-neutral-950 p-4 rounded-xl mb-6 flex flex-col items-center">
                             <p className="text-neutral-400 text-sm mb-2">Reproduciendo ahora:</p>
-                            <h2 className="text-xl font-semibold text-white mb-4">
+                            <h2 className="text-lg md:text-xl font-semibold text-white mb-4 text-center">
                                 {cancionActual ? `${cancionActual.titulo} - ${cancionActual.artista}` : 'Ninguna pista seleccionada'}
                             </h2>
                             <audio
                                 ref={audioRef}
                                 src={cancionActual?.url_archivo}
                                 controls
-                                className="w-full outline-none"
+                                className="w-full outline-none h-10 md:h-12"
                             />
                         </div>
 
@@ -131,7 +124,7 @@ export default function Reproductor() {
                                 placeholder="Título de la canción"
                                 value={titulo}
                                 onChange={(e) => setTitulo(e.target.value)}
-                                className="w-full bg-neutral-800 p-3 rounded-lg text-white outline-none focus:ring-2 focus:ring-green-400"
+                                className="w-full bg-neutral-800 p-3 rounded-lg text-white outline-none focus:ring-2 focus:ring-purple-500 transition"
                                 required
                             />
                             <input
@@ -139,19 +132,19 @@ export default function Reproductor() {
                                 placeholder="Artista"
                                 value={artista}
                                 onChange={(e) => setArtista(e.target.value)}
-                                className="w-full bg-neutral-800 p-3 rounded-lg text-white outline-none focus:ring-2 focus:ring-green-400"
+                                className="w-full bg-neutral-800 p-3 rounded-lg text-white outline-none focus:ring-2 focus:ring-purple-500 transition"
                             />
                             <input
                                 type="file"
                                 accept="audio/*"
                                 onChange={(e) => setArchivoFisico(e.target.files[0])}
-                                className="w-full bg-neutral-800 p-2 rounded-lg text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-500 file:text-neutral-950 hover:file:bg-green-400"
+                                className="w-full bg-neutral-800 p-2 rounded-lg text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-500 transition"
                                 required
                             />
                             <button
                                 type="submit"
                                 disabled={cargando}
-                                className="w-full bg-green-500 text-neutral-950 font-bold py-3 rounded-lg hover:bg-green-400 transition disabled:opacity-50"
+                                className="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-500 transition shadow-lg shadow-purple-500/20 disabled:opacity-50"
                             >
                                 {cargando ? 'Guardando...' : 'Subir a la BD'}
                             </button>
@@ -159,30 +152,29 @@ export default function Reproductor() {
                     </div>
                 </div>
 
-                {/* Lista de reproducción */}
-                <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl">
-                    <h2 className="text-2xl font-bold mb-6">Lista de Reproducción</h2>
-                    <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                <div className="bg-neutral-900 p-5 md:p-6 rounded-2xl border border-neutral-800 shadow-xl">
+                    <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Lista de Reproducción</h2>
+                    <div className="space-y-2 max-h-[350px] md:max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                         {canciones.length === 0 ? (
-                            <p className="text-neutral-500 text-center mt-10">No hay canciones en la base de datos.</p>
+                            <p className="text-neutral-500 text-center mt-10 text-sm md:text-base">No hay canciones en la base de datos.</p>
                         ) : (
                             canciones.map((cancion) => (
                                 <div
                                     key={cancion.id}
                                     onClick={() => reproducir(cancion)}
-                                    className={`p-4 rounded-xl cursor-pointer transition flex justify-between items-center ${cancionActual?.id === cancion.id
-                                            ? 'bg-green-500/20 border border-green-500/50'
-                                            : 'bg-neutral-800 hover:bg-neutral-700'
+                                    className={`p-3 md:p-4 rounded-xl cursor-pointer transition flex justify-between items-center ${cancionActual?.id === cancion.id
+                                        ? 'bg-purple-500/20 border border-purple-500/50'
+                                        : 'bg-neutral-800 hover:bg-neutral-700'
                                         }`}
                                 >
-                                    <div>
-                                        <h4 className={`font-semibold ${cancionActual?.id === cancion.id ? 'text-green-400' : 'text-white'}`}>
+                                    <div className="truncate pr-2">
+                                        <h4 className={`font-semibold truncate ${cancionActual?.id === cancion.id ? 'text-purple-400' : 'text-white'}`}>
                                             {cancion.titulo}
                                         </h4>
-                                        <p className="text-sm text-neutral-400">{cancion.artista}</p>
+                                        <p className="text-xs md:text-sm text-neutral-400 truncate">{cancion.artista}</p>
                                     </div>
                                     {cancionActual?.id === cancion.id && (
-                                        <span className="text-green-400 animate-pulse">▶</span>
+                                        <span className="text-purple-400 animate-pulse flex-shrink-0">▶</span>
                                     )}
                                 </div>
                             ))
