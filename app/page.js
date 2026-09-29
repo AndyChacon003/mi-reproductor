@@ -1,8 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Reproductor() {
+    const router = useRouter();
+    const [autorizado, setAutorizado] = useState(false);
+    const [usuario, setUsuario] = useState(null);
+
     const [canciones, setCanciones] = useState([]);
     const [cancionActual, setCancionActual] = useState(null);
     const audioRef = useRef(null);
@@ -13,17 +18,39 @@ export default function Reproductor() {
     const [cargando, setCargando] = useState(false);
 
     useEffect(() => {
-        fetch('/api/canciones')
-            .then((res) => res.json())
-            .then((data) => setCanciones(data));
-    }, []);
+        // 1. Verificamos si existe la sesión en el navegador
+        const usuarioGuardado = localStorage.getItem('usuario');
+
+        if (!usuarioGuardado) {
+            // Si no hay sesión, lo regresamos al login de inmediato
+            router.push('/login');
+        } else {
+            // Si hay sesión, guardamos sus datos, damos permiso y cargamos las canciones
+            setUsuario(JSON.parse(usuarioGuardado));
+            setAutorizado(true);
+
+            fetch('/api/canciones')
+                .then(async (res) => {
+                    if (!res.ok) throw new Error('Error de conexión');
+                    return res.json();
+                })
+                .then((data) => {
+                    if (Array.isArray(data)) setCanciones(data);
+                })
+                .catch((err) => console.error(err));
+        }
+    }, [router]);
+
+    // Función para salir
+    const cerrarSesion = () => {
+        localStorage.removeItem('usuario');
+        router.push('/login');
+    };
 
     const reproducir = (cancion) => {
         setCancionActual(cancion);
         setTimeout(() => {
-            if (audioRef.current) {
-                audioRef.current.play();
-            }
+            if (audioRef.current) audioRef.current.play();
         }, 100);
     };
 
@@ -32,7 +59,6 @@ export default function Reproductor() {
         if (!archivoFisico || !titulo) return alert("Falta el título o el archivo");
 
         setCargando(true);
-
         try {
             const urlSimulada = URL.createObjectURL(archivoFisico);
 
@@ -47,13 +73,11 @@ export default function Reproductor() {
             });
 
             const nuevaCancion = await response.json();
-
             setCanciones([nuevaCancion, ...canciones]);
             setTitulo('');
             setArtista('');
             setArchivoFisico(null);
             e.target.reset();
-
         } catch (error) {
             console.error("Error al subir:", error);
         } finally {
@@ -61,13 +85,31 @@ export default function Reproductor() {
         }
     };
 
+    // Evita que la pantalla del reproductor parpadee antes de redirigir al login
+    if (!autorizado) return null;
+
     return (
         <div className="min-h-screen bg-neutral-950 text-white p-8 font-sans">
+
+            {/* Cabecera con saludo y botón de salir */}
+            <div className="max-w-4xl mx-auto flex justify-between items-center mb-8 bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow-lg">
+                <p className="text-neutral-300">
+                    Hola, <span className="font-bold text-green-400">{usuario?.nombre}</span> 👋
+                </p>
+                <button
+                    onClick={cerrarSesion}
+                    className="bg-red-500/10 text-red-500 hover:bg-red-500/20 px-4 py-2 rounded-lg text-sm font-semibold transition"
+                >
+                    Cerrar Sesión
+                </button>
+            </div>
+
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
 
+                {/* Panel del Reproductor y Formulario */}
                 <div className="space-y-8">
                     <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl">
-                        <h1 className="text-3xl font-bold mb-6 text-green-400">Mi Reproductor</h1>
+                        <h1 className="text-3xl font-bold mb-6 text-green-400">🎵 Mi Reproductor</h1>
 
                         <div className="bg-neutral-950 p-4 rounded-xl mb-6 flex flex-col items-center">
                             <p className="text-neutral-400 text-sm mb-2">Reproduciendo ahora:</p>
@@ -117,6 +159,7 @@ export default function Reproductor() {
                     </div>
                 </div>
 
+                {/* Lista de reproducción */}
                 <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl">
                     <h2 className="text-2xl font-bold mb-6">Lista de Reproducción</h2>
                     <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
@@ -128,8 +171,8 @@ export default function Reproductor() {
                                     key={cancion.id}
                                     onClick={() => reproducir(cancion)}
                                     className={`p-4 rounded-xl cursor-pointer transition flex justify-between items-center ${cancionActual?.id === cancion.id
-                                        ? 'bg-green-500/20 border border-green-500/50'
-                                        : 'bg-neutral-800 hover:bg-neutral-700'
+                                            ? 'bg-green-500/20 border border-green-500/50'
+                                            : 'bg-neutral-800 hover:bg-neutral-700'
                                         }`}
                                 >
                                     <div>
